@@ -1,0 +1,98 @@
+---
+title: "Logistic Regression"
+author: "Anna Lizarov"
+date: "12/9/2019"
+output: html_document
+---
+
+#Libraries
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(car)
+library(EffectStars)
+library(nnet)
+```
+
+# Datasets
+```{r}
+V <- read.csv("studentVle.csv", header=TRUE, na.strings = "")
+A <- read.csv("studentAssessment.csv", header=TRUE, na.strings = "")
+I <- read.csv("studentInfo.csv", header=TRUE, na.strings = "")
+```
+
+# Merging datasets
+```{r}
+# Calculating Average daily clicks for each student
+V1 <- V %>% select(id_student,sum_click) %>%  group_by(id_student) %>% summarise(mean_click=mean(sum_click))
+
+# Calculating Average assessment score for each student
+A1 <- A %>% select(id_student,score) %>% group_by(id_student) %>%summarise(mean_score=mean(score))
+
+# Merging the datasets
+I1 <- I %>% group_by(id_student)
+VA <- full_join(V1, A1, by="id_student")
+IVA <- full_join(I1, VA, by = "id_student")
+save(IVA, file = "IVA.Rdata")
+```
+
+
+## Omitting students who have withdrawn
+```{r}
+IVA2 = IVA
+IVA2 <- filter(IVA2, final_result != "Withdrawn")  #remove students who withdrew
+IVA2$final_result[IVA2$final_result == "Distinction"] <- "Pass"  #rows where final_result = distinction where renames to "pass" 
+IVA2$final_result = factor(IVA2$final_result)
+table(IVA2$final_result)
+## Bar graph
+ggplot(IVA2, aes(final_result)) + geom_bar(fill = "red") + labs(title = "The Number of Students Passing or Failing the Course", x = "Student's Final Result", y = "Frequency") + theme_classic()
+```
+
+#Recoding
+```{r}
+## Student's gender
+IVA2$gender = ifelse(IVA2$gender == "M", 0, 1)
+IVA2$gender= factor(IVA2$gender, levels = c(0,1), labels= c("M", "F"))
+## Student's final result (course completion outcome)
+IVA2$final_result = ifelse(IVA2$final_result == "Fail", 0, 1)
+IVA2$final_result= factor(IVA2$final_result, levels = c(0,1), labels= c("Fail", "Pass"))
+## Student's age range
+IVA2$age_band = ifelse(IVA2$age_band == "0-35",0, ifelse(IVA2$age_band == "35-55", 1, 2))
+IVA2$age_band= factor(IVA2$age_band, levels = c(0,1,2), labels= c("17-35", "35-55", "55<="))
+```
+
+## Boxplots
+```{r}
+# Boxplots for Diagnostics
+boxplot(IVA2$mean_click ~ IVA2$final_result,
+        horizontal = TRUE,
+        main = "Boxplot of Average Number of Daily Clicks \nby Final Course Result",
+        xlab = "Average Number of Daily Clicks",
+        ylab = "Final Course Result")
+```
+# Dummy-Coding of the categorical variables
+```{r}
+options(contrasts = c("contr.treatment", "contr.poly"))
+levels(IVA2$final_result) # will set "Fail" as a reference category
+```
+
+# Logistic Regression Model
+```{r}
+glm1 <- glm(formula=final_result~age_band+gender+mean_click + mean_score+ age_band:gender, data=IVA2, family = "binomial" )
+summary(glm1) # these are logit coefficients
+
+## Interaction between age range and gender is not significant
+
+## Coefficients:
+coef(glm1) 
+
+```
+
+```{r}
+## Exponentiated (and rounded) coefficients: It converts
+round(exp(coef(glm1)), 2) 
+```
+
+
+

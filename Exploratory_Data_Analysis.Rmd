@@ -1,0 +1,99 @@
+---
+title: "Exploratory Data Analysis"
+author: "Anna Lizarov"
+date: "11/3/2019"
+output: html_document
+---
+
+# Libraries
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(corrplot)
+library(emmeans)
+```
+
+# Datasets
+```{r}
+V <- read.csv("studentVle.csv", header=TRUE, na.strings = "")
+A <- read.csv("studentAssessment.csv", header=TRUE, na.strings = "")
+I <- read.csv("studentInfo.csv", header=TRUE, na.strings = "")
+```
+
+# Merging datasets
+```{r}
+# Calculating Average daily clicks for each student
+V1 <- V %>% select(id_student,sum_click) %>%  group_by(id_student) %>% summarise(mean_click=mean(sum_click))
+
+# Calculating Average assessment score for each student
+A1 <- A %>% select(id_student,score) %>% group_by(id_student) %>%summarise(mean_score=mean(score))
+
+# Merging the datasets
+I1 <- I %>% group_by(id_student)
+VA <- full_join(V1, A1, by="id_student")
+IVA <- full_join(I1, VA, by = "id_student")
+```
+
+# Deviation Coding
+```{r}
+IVA2 = IVA
+options(contrasts = c("contr.sum", "contr.poly")) 
+```
+
+# Selecting needed variables
+```{r}
+IVA2 <- IVA2 %>% select(gender, age_band, mean_click, mean_score, final_result)
+```
+
+# Exploratory Data Analysis
+
+## Omitting students who have withdrawn
+```{r}
+IVA2 <- filter(IVA2, final_result != "Withdrawn")  #remove students who withdrew
+IVA2$final_result[IVA2$final_result == "Distinction"] <- "Pass"  #rows where final_result = distinction where renames to "pass" 
+IVA2$final_result = factor(IVA2$final_result)
+table(IVA2$final_result)
+ggplot(IVA2, aes(final_result)) + geom_bar(fill = "red") + labs(title = "The Number of Students Passing or Failing the Course", x = "Student's Final Result", y = "Frequency") + theme_classic()
+```
+
+## Boxplots
+```{r}
+# Boxplots for Diagnostics
+boxplot(IVA2$mean_click ~ IVA2$final_result,
+        horizontal = TRUE,
+        main = "Boxplot of Average Number of Daily Clicks \nby Final Course Result",
+        xlab = "Average Number of Daily Clicks",
+        ylab = "Final Course Result")
+```
+#Recoding
+```{r}
+IVA2$gender = ifelse(IVA2$gender == "M", 0, 1)
+IVA2$gender= factor(IVA2$gender, levels = c(0,1), labels= c("M", "F"))
+IVA2$final_result = ifelse(IVA2$final_result == "Fail", 0, 1)
+IVA2$final_result= factor(IVA2$final_result, levels = c(0,1), labels= c("Fail", "Pass"))
+IVA2$age_band = ifelse(IVA2$age_band == "0-35",0, ifelse(IVA2$age_band == "35-55", 1, 2))
+IVA2$age_band= factor(IVA2$age_band, levels = c(0,1,2), labels= c("0-35", "35-55", "55<="))
+
+```
+
+#Devitation coding
+```{r}
+options(contrasts = c("contr.sum", "contr.poly")) 
+```
+
+#Interaction Plot
+```{r}
+# Fit the full model.
+lm1 <- lm(mean_score ~ age_band + gender + age_band:gender, 
+          data = IVA2)
+summary(lm1)
+```
+```{r}
+emmip(object = lm1, 
+      formula = age_band ~ gender, # trace factor first, x factor second
+      xlab = "Gender",
+      ylab = "Estimated Marginal Means")
+```
+
+

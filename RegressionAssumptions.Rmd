@@ -1,0 +1,51 @@
+---
+title: "Regression Assumptions"
+author: "Anna Lizarov"
+date: "12/10/2019"
+output: html_document
+---
+
+# Libraries
+```{r}
+library(car)
+library(dplyr)
+library(tidyr)
+library(corrplot)
+```
+
+# Dataset
+```{r}
+V <- read.csv("studentVle.csv", header=TRUE, na.strings = "")
+A <- read.csv("studentAssessment.csv", header=TRUE, na.strings = "")
+I <- read.csv("studentInfo.csv", header=TRUE, na.strings = "")
+```
+
+# Merging datasets
+```{r}
+# Calculating Average daily clicks for each student
+V1 <- V %>% select(id_student,sum_click) %>%  group_by(id_student) %>% summarise(mean_click=mean(sum_click))
+
+# Calculating Average assessment score for each student
+A1 <- A %>% select(id_student,score) %>% group_by(id_student) %>%summarise(mean_score=mean(score))
+
+# Merging the datasets
+I1 <- I %>% group_by(id_student)
+VA <- full_join(V1, A1, by="id_student")
+IVA <- full_join(I1, VA, by = "id_student")
+```
+
+# Deviation Coding
+```{r}
+IVA2 = IVA
+options(contrasts = c("contr.sum", "contr.poly")) 
+```
+
+## Omitting students who have withdrawn
+```{r}
+IVA2 <- filter(IVA2, final_result != "Withdrawn")  #remove students who withdrew
+IVA2$final_result[IVA2$final_result == "Distinction"] <- "Pass"  #rows where final_result = distinction where renames to "pass" 
+IVA2$final_result = factor(IVA2$final_result)
+table(IVA2$final_result)
+ggplot(IVA2, aes(final_result)) + geom_bar(fill = "red") + labs(title = "The Number of Students Passing or Failing the Course", x = "Student's Final Result", y = "Frequency") + theme_classic()
+```
+
