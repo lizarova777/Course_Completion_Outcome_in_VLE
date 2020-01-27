@@ -24,8 +24,8 @@ There were two following variables created: each student’s average number of d
 
 ### Factors that Predict Course Completion Outcome
 
-![Figure1]()
-![Figure2]()
+![Figure1](https://github.com/lizarova777/Course_Completion_Outcome_in_VLE/blob/master/Figure1.PNG)
+![Figure2](https://github.com/lizarova777/Course_Completion_Outcome_in_VLE/blob/master/Figure2.PNG)
 
 #### Model
 ```
@@ -44,8 +44,8 @@ The results showed that the student’s gender, age range, the average number of
 
 ### Interaction of Age Range and Gender on the Average Assessment Score
 
-![Figure6]()
-![Figure7]()
+![Figure6](https://github.com/lizarova777/Course_Completion_Outcome_in_VLE/blob/master/Figure6.PNG)
+![Figure7](https://github.com/lizarova777/Course_Completion_Outcome_in_VLE/blob/master/Figure7.PNG)
 
 #### Model
 ```
