@@ -6,7 +6,7 @@ The purpose of this research is to determine whether students’ gender, age ran
 
 ## Methodology
 
-In the present study, seven anonymized datasets were retrieved from the Open University in the United Kingdom (Kuzilek, Hlosta, & Zdrahal, 2017). The codebook can be found [here](https://analyse.kmi.open.ac.uk/open_dataset).They contain data regarding the students, courses, and student interaction with the Virtual Learning Environment (VLE) for seven courses, where students had access to the course materials online and their interactions with the materials were recorded. Three of these datasets were merged. 
+In the present study, seven anonymized datasets were retrieved from the Open University in the United Kingdom (Kuzilek, Hlosta, & Zdrahal, 2017). The codebook can be found [here](https://analyse.kmi.open.ac.uk/open_dataset). They contain data regarding the students, courses, and student interaction with the Virtual Learning Environment (VLE) for seven courses, where students had access to the course materials online and their interactions with the materials were recorded. Three of these datasets were merged. 
 
 ### Participants
 
